@@ -9,7 +9,14 @@ phases:
     commands:
       - apt-get clean
       - apt-get update
-      - apt-get  -y install jq
+      # Remove the old key
+      - sudo apt-key del A122542AB04F24E3
+      # Add the new key
+      - curl -fsSL https://apt.corretto.aws/corretto.key | sudo apt-key add -
+      # Add the Google public key
+      - curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+      - sudo apt-get update
+      - sudo apt-get -y install jq
       - pip install --upgrade awscli pytest
       - echo 'about to call dockerd'
       - nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://127.0.0.1:2375 --storage-driver=overlay2&
