@@ -7,6 +7,10 @@ phases:
     runtime-versions:
       python: 3.7
     commands:
+      - apt-get clean
+      - apt-get update
+      - apt-get  -y install jq
+      - pip install --upgrade awscli pytest
       - echo 'about to call dockerd'
       - nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://127.0.0.1:2375 --storage-driver=overlay2&
       - timeout 15 sh -c "until docker info; do echo .; sleep 1; done"
@@ -30,8 +34,11 @@ phases:
       - echo 'export PATH=$PWD/:$PATH' >> $HOME/.bashrc
       - echo `kubectl version --short --client`
       - python -m pip install --upgrade --force pip
-      - wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add
-      - apt-get update && apt-get -y install jq  && pip install --upgrade awscli pytest
+      - wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key adda
+      - apt-get update || { echo "apt-get update failed"; exit 1; }
+      - apt-get -y install jq
+      - pip install --upgrade awscli pytest
+      #- apt-get update && apt-get -y install jq  && pip install --upgrade awscli pytest
   pre_build:
     commands:
       - TAG="$REPOSITORY_NAME.$REPOSITORY_BRANCH.$ENVIRONMENT_NAME.$(date +%Y-%m-%d.%H.%M.%S).$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | head -c 8)"
